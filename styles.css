@@ -78,7 +78,7 @@ h1 {
 }
 
 .club-card:hover {
-    transform: translateY(-10px); 
+    transform: translateY(-20px); 
     border-color:#630436 ;
 }
 
