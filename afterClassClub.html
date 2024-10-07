@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>After School Clubs</title>
+    <!-- Link to external CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Font Awesome for shopping cart icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Reference to Vue.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.7.16/dist/vue.js"></script> 
+</head>
+<body>
+    <div id="App">
+        <header>
+            <h1>{{ sitename }}</h1>
+    
+            <!-- Cart Icon (only visible if there are items in the cart) -->
+            <button class="cart-icon" v-if="cart.length > 0" v-on:click="toggleCheckout">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count">{{ cart.length }}</span>
+            </button>
+        </header>
+    
+        <main>
+
+            <div v-if="showSuccess">
+                <div class="success-message-container">
+                    <div class="success-message">
+                        <h3> hallo {{name}}, the checkout was successful!</h3>
+                        <button v-on:click="toggleSuccess()">Return</button>
+                    </div>
+                </div>
+            </div>
+    
+            <div v-if="showCheckout && !showSuccess">
+                <div class="checkout-container">
+                    <div class="cart-items">
+                        <div class="cart-item" v-for="item in cart" :key="item.id">
+                            <figure>
+                                <img :src="item.image" :alt="item.subject" class="cart-item-image">
+                            </figure>
+                            <div class="cart-item-info">
+                                <h2>{{ item.subject }}</h2>
+                                <p><strong>Price:</strong> {{ item.price }}</p>
+                                <p><strong>Location:</strong> {{ item.location }}</p>
+                            </div>
+                            <button v-on:click="toggleCart(item)">
+                                <i class="fas fa-times fa-lg"></i>
+                            </button>                            
+                        </div>
+                    </div>
+            
+                    <div class="checkout-form">
+                        <form v-on:submit.prevent="validateAndSubmit">
+                            <label for="name">Name</label>
+                            <input 
+                                type="text" 
+                                v-model="name" 
+                                v-on:input="validateName"
+                                placeholder='Enter your name'
+                                :class="{ invalid: !isNameValid && name }"
+                            >
+                            <span v-if="!isNameValid && name" class="error-message">{{nameError}}</span>
+            
+                            <label for="phone">Phone</label>
+                            <input 
+                                type="text" 
+                                v-model="phone" 
+                                v-on:input="validatePhone"
+                                placeholder='Enter your phone number'
+                                :class="{ invalid: !isPhoneValid && phone }"
+                            >
+                            <span v-if="!isPhoneValid && phone" class="error-message">{{phoneError}}</span>
+            
+                            <button type="submit" :disabled="!isFormValid" class="checkout-button">
+                                Checkout
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Lessons and Clubs List -->
+            <div v-else-if="!showSuccess && !showCheckout">
+                <div class="sidebar">
+                    <!-- Filter Group for Criteria Selection -->
+                    <div class="filter">
+                        <div class="filter-group">
+                            <label for="filterCriteria">Filter:</label>
+                            <select id="filterCriteria" v-model="filterCriteria">
+                                <option value="">None</option>
+                                <option value="subject">Subject</option>
+                                <option value="location">Location</option>
+                                <option value="price">Price</option>
+                                <option value="availability">Availability</option>
+                            </select>
+                        </div>
+    
+                        <!-- Sort Direction (Active only if a filter is selected) -->
+                        <div class="filter-group" v-if="filterCriteria">
+                            <label for="sortDirection">Sort:</label>
+                            <select id="sortDirection" v-model="sortDirection">
+                                <option value="asc">Ascending</option>
+                                <option value="desc">Descending</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="clubs-container">
+                    <div class="club-card" v-for="club in filteredAndSortedClubs" :key="club.id">
+                        <figure>
+                            <img :src="club.image" :alt="club.subject + ' image'" class="club-image">
+                        </figure>
+                        <h2>{{ club.subject }}</h2>
+                        <p><strong>Location:</strong> {{ club.location }}</p>
+                        <p><strong>Price:</strong> {{ club.price }}</p>
+                        <p><strong>Availability:</strong> {{ club.availability }}</p>
+    
+                        <button 
+                            v-on:click="toggleCart(club)" 
+                            :disabled="club.availability === 0 && !isInCart(club)"
+                            :class="isInCart(club) ? 'add-button remove-from-cart' : 'add-button'">
+                            {{ 
+                                isInCart(club) ? 'Remove from Cart' : club.availability === 0 ? 'Out of Stock' : 
+                                'Add to Cart' 
+                            }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+
+    <script>
+        new Vue({
+            el: '#App',
+            data: {
+                sitename: "After School Clubs",
+                filterCriteria: '', // Selected filter criteria (subject, location, price, availability)
+                sortDirection: '', // Sort direction (asc or desc)
+                clubs: [
+                    {
+                        id: 1,
+                        subject: "Maths",
+                        location: "Burjuman",
+                        price: 200,
+                        availability: 5,
+                        image: "images/math.jpg"
+                    },
+                    {
+                        id: 2,
+                        subject: "English",
+                        location: "Al Barsha",
+                        price: 180,
+                        availability: 4,
+                        image: "images/english.jpg"
+                    },
+                    {
+                        id: 3,
+                        subject: "Science",
+                        location: "Al Rigga",
+                        price: 220,
+                        availability: 1, 
+                        image: "images/science.jpg"
+                    },
+                    {
+                        id: 4,
+                        subject: "Sports",
+                        location: "Al Khail",
+                        price: 400,
+                        availability: 3,
+                        image: "images/sports.jpg"
+                    },
+                    {
+                        id: 5,
+                        subject: "Music",
+                        location: "Al Majaz",
+                        price: 350,
+                        availability: 2,
+                        image: "images/music.jpg"
+                    },
+                    {
+                        id: 6,
+                        subject: "Debate",
+                        location: "Deira",
+                        price: 270,
+                        availability: 3, 
+                        image: "images/debate.jpg"
+                    },
+                    {
+                        id: 7,
+                        subject: "Technology",
+                        location: "Expo City",
+                        price: 190,
+                        availability: 4,
+                        image: "images/tech.jpg"
+                    },
+                    {
+                        id: 8,
+                        subject: "Art",
+                        location: "Emirates Hills",
+                        price: 260,
+                        availability: 1,
+                        image: "images/art.jpg"
+                    },
+                    {
+                        id: 9,
+                        subject: "Photography",
+                        location: "Palm Jumeirah",
+                        price: 320,
+                        availability: 6, 
+                        image: "images/photography.jpg"
+                    },
+                    {
+                        id: 10,
+                        subject: "History",
+                        location: "Khalifa Street",
+                        price: 340,
+                        availability: 8, 
+                        image: "images/history.jpeg"
+                    }
+
+                ],
+                cart: [],
+                showCheckout: false,
+                showSuccess: false,
+                name: '',
+                phone: '',
+                nameError: '',
+                phoneError: '',
+                isNameValid: false,
+                isPhoneValid: false
+            },
+            computed: {
+                filteredAndSortedClubs() {
+                    let sortedClubs = this.clubs;
+                    // Only apply sorting if both criteria and direction are selected
+                    if (this.filterCriteria && this.sortDirection) {
+                        sortedClubs = sortedClubs.sort((a, b) => {
+                            return this.sortClubs(a, b, this.filterCriteria);
+                        });
+                    }
+
+                    return sortedClubs;
+                },
+                isFormValid() {
+                    return this.isNameValid && this.isPhoneValid;
+                }
+            },
+            methods: {
+                toggleCart(club) {
+                    if (this.isInCart(club)) {
+                        this.removeFromCart(club);
+                        
+                    } else {
+                        this.addToCart(club);
+                    }
+                },
+
+                toggleCheckout() {
+                    this.showCheckout = !this.showCheckout
+                    if (this.showCheckout){
+                        this.name = null
+                        this.phone = null
+                    }
+
+                },
+
+                toggleSuccess() {
+                    this.showSuccess = !this.showSuccess;
+                    
+                },
+
+                sortClubs(club1, club2, filter) {
+                    if (club1[filter] > club2[filter]) {
+                        return this.sortDirection === 'asc' ? 1 : -1;
+                    } else if (club1[filter] < club2[filter]) {
+                        return this.sortDirection === 'asc' ? -1 : 1;
+                    } else {
+                        return 0;
+                    }
+                },
+
+                addToCart(club) {
+                    if (club.availability > 0) {
+                        this.cart.push({ ...club });
+                        
+                        const realClub = this.clubs.find(c => c.id === club.id);
+                    
+                        if (realClub) {
+                            realClub.availability -= 1;
+                        }
+                    }
+                },
+
+                removeFromCart(club) {
+                    const index = this.cart.findIndex(item => item.id === club.id);
+                    if (index !== -1) {
+                        this.cart.splice(index, 1);
+
+                        const realClub = this.clubs.find(c => c.id === club.id);
+                        if (realClub) {
+                            realClub.availability += 1;
+                        }
+
+                        if(this.cart.length == 0 && this.showCheckout){
+                            this.toggleCheckout()
+                        }
+                    }
+                },
+                
+                isInCart(club) {
+                    return this.cart.some(item => item.id === club.id);
+                },
+
+                validateName() {
+                    const namePattern = /^[A-Za-z\s]*$/; 
+                    const lengthValid = this.name.length <= 50 && this.name.length > 0; 
+                    
+                    if (!namePattern.test(this.name) && this.name.length > 0) {
+                        this.nameError = 'Name should only contain letters.';
+                    } else if (!lengthValid) {
+                        this.nameError = 'Name cannot exceed 50 characters.';
+                    } else {
+                        this.nameError = ''; 
+                    }
+                    
+                    this.isNameValid = namePattern.test(this.name) && lengthValid; 
+                },
+
+                validatePhone() {
+                    const phonePattern = /^[0-9]*$/; 
+                    const lengthValid = this.phone.length <= 17 && this.phone.length > 0; 
+
+                    if (!phonePattern.test(this.phone) && this.phone.length > 0) {
+                        this.phoneError = 'Phone should only contain numbers.';
+                    } else if (!lengthValid) {
+                        this.phoneError = 'Phone cannot exceed 17 digits.';
+                    } else {
+                        this.phoneError = ''; 
+                    }
+
+                    this.isPhoneValid = phonePattern.test(this.phone) && lengthValid; 
+                },
+
+                validateAndSubmit() {
+                    if (this.isFormValid) {
+                        this.cart = []; 
+                        this.showSuccess = true;
+                        this.showCheckout = false; 
+                    }
+                },
+                
+
+            }
+        });
+    </script>
+</body>
+</html>
