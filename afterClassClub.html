@@ -106,7 +106,17 @@
                             </select>
                         </div>
                     </div>
+                    <div class="search-bar">
+                        <input 
+                            type="text" 
+                            v-model="searchQuery" 
+                            placeholder="Search"
+                        >
+                    </div>
                 </div>
+
+                
+                
     
                 <div class="clubs-container">
                     <div class="club-card" v-for="club in filteredAndSortedClubs" :key="club.id">
@@ -232,12 +242,22 @@
                 nameError: '',
                 phoneError: '',
                 isNameValid: false,
-                isPhoneValid: false
+                isPhoneValid: false,
+                searchQuery: '',
             },
             computed: {
                 filteredAndSortedClubs() {
                     let sortedClubs = this.clubs;
-                    // Only apply sorting if both criteria and direction are selected
+
+                    // Apply search filter
+                    if (this.searchQuery) {
+                        sortedClubs = sortedClubs.filter(club => 
+                            club.subject.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+                            club.location.toLowerCase().includes(this.searchQuery.toLowerCase())
+                        );
+                    }
+
+                    // Apply sorting if both criteria and direction are selected
                     if (this.filterCriteria && this.sortDirection) {
                         sortedClubs = sortedClubs.sort((a, b) => {
                             return this.sortClubs(a, b, this.filterCriteria);
