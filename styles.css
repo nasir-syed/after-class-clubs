@@ -20,9 +20,9 @@ header {
 
 h1 {
     margin: 0;
-    font-size: 50px;
+    font-size: 60px;
     font-family:'Brush Script MT', 'Brush Script Std', 'cursive';
-    color:#630436
+    color:#93064d
 }
 
 
@@ -44,7 +44,7 @@ h1 {
 
 .cart-icon :hover {
     transition: 0.2s ease-in-out;
-    color: #630436;
+    color: #93064d;
 }
 
 .cart-count {
@@ -58,30 +58,80 @@ h1 {
 
 
 .clubs-container {
+    margin-top: 150px; 
     display: flex;
     flex-wrap: wrap;
-    justify-content:space-evenly;
+    justify-content: space-evenly;
     padding: 40px;
+}
+
+.clubs-container a, .cart-item-info a{
+    text-decoration: none;
+    color: white;
+}
+
+.clubs-container a:hover{
+    color: #93064d;
+    transition: 0.2s ease-in-out;
+}
+
+.cart-item-info a:hover {
+    color: #93064d;
+    transition: 0.2s ease-in-out;
 }
 
 
 .club-card {
     background-color: #171717; 
-    border: 2px solid #4d0f28; 
+    border: 3px solid #4d0f28; 
     border-radius: 12px; 
     padding: 20px;
     margin: 15px;
     text-align: center;
     width: 220px; 
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); 
-    transition: transform 0.3s ease-in-out;
+    /* transition: transform 0.3s ease-in-out; */
+    transform-style: preserve-3d;
+    transition: all 1s ease-in-out;
+    transform: translate(0%);
 }
 
 .club-card:hover {
-    transform: translateY(-20px); 
-    border-color:#630436 ;
+    transform: rotateY(180deg);
 }
 
+
+.card-front {
+    backface-visibility: hidden;
+    overflow: hidden;
+    border-radius: 12px; 
+
+  }
+  
+  
+.card-back {
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    backface-visibility: hidden;
+    overflow: hidden;
+    text-align: center;
+    transform: rotateY(180deg);
+    padding: 15px;
+    
+}
+
+.card-back p {
+    margin-top: 10%;
+}
+
+.card-back button {
+    width: 75%;
+    position: relative;
+    margin-top: 70%;
+
+}
 
 .club-image {
     width: 150px; 
@@ -107,7 +157,7 @@ p {
 /* Button styling */
 .add-button {
     padding: 10px 15px;
-    background-color: #630436; /* Default button background */
+    background-color: #93064d; /* Default button background */
     color: white;
     border: none;
     border-radius: 5px;
@@ -199,7 +249,7 @@ p {
 
 .search-bar input:focus {
     outline: none; 
-    border-color: #630436; 
+    border-color: #93064d; 
 }
 
 .sort-direction {
@@ -224,15 +274,7 @@ p {
 }
 
 
-.clubs-container {
-    margin-top: 150px; 
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-evenly;
-    padding: 40px;
-}
 
-/* Checkout Container styling */
 .checkout-container {
     display: flex;
     justify-content: space-between;
@@ -241,33 +283,48 @@ p {
     gap: 5%;
 }
 
-/* Cart items styling */
-.cart-items {
-    width: 65%; 
+.cart-items-container {
+    width: 65%;
     margin-left: 50px;
-    margin-bottom: 25px;
+}
+
+.cart-header {
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.cart-header h2 {
+    font-size: 30px;
+    color: #f5f5f5;
+}
+
+.cart-items {
+    max-height: 200px; 
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
-    gap: 3%;
 }
 
 .cart-item {
     display: flex;
     background-color: #171717;
-    border: 2px solid #4d0f28;
+    border: 3px solid #93064d;
     padding: 20px;
-    margin-bottom: 10px;
+    width: 90%;
+    margin-bottom: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    overflow-y: auto;
 }
 
 .cart-item-image {
-    width: 120px;
-    height: 120px;
+    width: 100px;
+    height: 100px;
     object-fit: cover;
     border-radius: 8px;
-    margin-right: 20px;
+    margin-right: 15px;
 }
 
 .cart-item-info {
@@ -278,8 +335,8 @@ p {
 }
 
 .cart-item-info h2 {
-    font-size: 35px;
-    margin: 15px 0px 15px 0px;
+    font-size: 25px;
+    margin: 30px 0px 15px 0px;
     color: #f5f5f5;
 }
 
@@ -289,8 +346,13 @@ p {
     color: #f5f5f5;
 }
 
+.cart-item-info a {
+    text-decoration: none;
+    color: #f5f5f5;
+}
+
 .cart-item button {
-    height: 23%;
+    height: 25%;
     padding: 11px 12px; 
     margin-left: auto;
     display: flex;
@@ -299,23 +361,24 @@ p {
     border: none;
     border-radius: 50%;
     cursor: pointer;
-    background-color: rgb(50, 50, 50);
+    background: none;
     color: #ccc;
 }
 
 .cart-item button:hover {
     transition: 0.3s ease-in-out;
-    background-color:#630436;
+    background-color: #93064d;
 }
 
 .checkout-form {
     width: 250px;
-    height: 275px; 
+    height: 250px; 
     display: flex;
     flex-direction: column;
     justify-content: center;
     background-color: #262626;
     padding: 20px;
+    border: 3px solid #93064d;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
 }
@@ -323,7 +386,7 @@ p {
 .checkout-form label {
     font-size: 17px;
     color: #f5f5f5;
-    margin: 5px 0px 5px 0px;
+    margin: 5px 0px 7px 0px;
     display: block;
 }
 
@@ -349,7 +412,7 @@ p {
 .checkout-button {
     display: block;
     padding: 12px 20px;
-    background-color: #630436;
+    background-color: #93064d;
     border: none;
     color: white;
     border-radius: 7px;
@@ -404,7 +467,7 @@ p {
     padding: 10px 15px;
     border-radius: 5px;
     border: none;
-    background-color:#630436;
+    background-color:#93064d;
     color: white;
 
 }
@@ -414,6 +477,24 @@ p {
     transition: 0.2s ease-in-out;
 }
 
-
+/* width */
+::-webkit-scrollbar {
+    width: 15px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: none;
+  }
+  
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #93064d;
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #4d0f28;
+  }
 
 

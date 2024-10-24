@@ -14,8 +14,6 @@
     <div id="App">
         <header>
             <h1>{{ sitename }}</h1>
-    
-            <!-- Cart Icon (only visible if there are items in the cart) -->
             <button class="cart-icon" v-if="cart.length > 0" v-on:click="toggleCheckout">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-count">{{ cart.length }}</span>
@@ -35,19 +33,33 @@
     
             <div v-if="showCheckout && !showSuccess">
                 <div class="checkout-container">
-                    <div class="cart-items">
-                        <div class="cart-item" v-for="item in cart" :key="item.id">
-                            <figure>
-                                <img :src="item.image" :alt="item.subject" class="cart-item-image">
-                            </figure>
-                            <div class="cart-item-info">
-                                <h2>{{ item.subject }}</h2>
-                                <p><strong>Price:</strong> {{ item.price }}</p>
-                                <p><strong>Location:</strong> {{ item.location }}</p>
+                    <div class="cart-items-container">
+                        <div class="cart-header">
+                            <h2>Order Summary</h2>
+                            <h2>Total: ${{getTotalPrice}}</h2>
+                        </div>
+                        <div class="cart-items">
+                            <div class="cart-item" v-for="item in cart" :key="item.id">
+                                <figure>
+                                    <img :src="item.image" :alt="item.subject" class="cart-item-image">
+                                </figure>
+                                <div class="cart-item-info">
+                                    <h2>{{ item.subject }}</h2>
+                                    <div style="display: flex; gap: 8px;">
+                                        <p>
+                                            <i class="fas fa-map-marker-alt" style="margin-right: 5px; color: #93064d;"></i>
+                                            <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(item.location)" target="_blank" style="text-decoration: none;">
+                                                {{ item.location }}
+                                            </a>
+                                        </p>
+                                        <p>·</p>
+                                        <p><strong>${{ item.price }}</strong></p>
+                                    </div>
+                                </div>
+                                <button v-on:click="toggleCart(item)">
+                                    <i class="fas fa-times fa-lg"></i>
+                                </button>
                             </div>
-                            <button v-on:click="toggleCart(item)">
-                                <i class="fas fa-times fa-lg"></i>
-                            </button>                            
                         </div>
                     </div>
             
@@ -80,11 +92,11 @@
                     </div>
                 </div>
             </div>
-    
-            <!-- Lessons and Clubs List -->
+            
+            
             <div v-else-if="!showSuccess && !showCheckout">
                 <div class="sidebar">
-                    <!-- Filter Group for Criteria Selection -->
+                    
                     <div class="filter">
                         <div class="filter-group">
                             <label for="filterCriteria">Filter:</label>
@@ -97,7 +109,7 @@
                             </select>
                         </div>
     
-                        <!-- Sort Direction (Active only if a filter is selected) -->
+                        
                         <div class="filter-group" v-if="filterCriteria">
                             <label for="sortDirection">Sort:</label>
                             <select id="sortDirection" v-model="sortDirection">
@@ -109,34 +121,45 @@
                     <div class="search-bar">
                         <input 
                             type="text" 
-                            v-model="searchQuery" 
+                            v-model="userQuery" 
                             placeholder="Search"
                         >
                     </div>
                 </div>
 
-                
-                
-    
                 <div class="clubs-container">
                     <div class="club-card" v-for="club in filteredAndSortedClubs" :key="club.id">
-                        <figure>
-                            <img :src="club.image" :alt="club.subject + ' image'" class="club-image">
-                        </figure>
-                        <h2>{{ club.subject }}</h2>
-                        <p><strong>Location:</strong> {{ club.location }}</p>
-                        <p><strong>Price:</strong> ${{ club.price }}</p>
-                        <p><strong>Availability:</strong> {{ club.availability }}</p>
-    
-                        <button 
-                            v-on:click="toggleCart(club)" 
-                            :disabled="club.availability === 0 && !isInCart(club)"
-                            :class="isInCart(club) ? 'add-button remove-from-cart' : 'add-button'">
-                            {{ 
-                                isInCart(club) ? 'Remove from Cart' : club.availability === 0 ? 'Out of Stock' : 
-                                'Add to Cart' 
-                            }}
-                        </button>
+                        <div class="card-front">
+                            <figure>
+                                <img :src="club.image" :alt="club.subject + ' image'" class="club-image">
+                            </figure>
+                            <h2>{{ club.subject }}</h2>
+                            <p>
+                                <i class="fas fa-map-marker-alt" style="margin-right: 5px; color: #93064d;"></i>
+                                <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(club.location)" target="_blank">
+                                    {{ club.location }}
+                                </a>
+                            </p>
+                            <div style="margin-top: 5%;">
+                                <p><strong>${{ club.price }}</strong></p>
+                                <p><strong>Stock:</strong> {{ club.availability }}</p>
+                            </div>
+                        </div>
+
+                        <div class="card-back">
+                            <p>
+                                {{club.description}}
+                            </p>
+                            <button 
+                                v-on:click="toggleCart(club)" 
+                                :disabled="club.availability === 0 && !isInCart(club)"
+                                :class="isInCart(club) ? 'add-button remove-from-cart' : 'add-button'">
+                                {{ 
+                                    isInCart(club) ? 'Remove from Cart' : club.availability === 0 ? 'Out of Stock' : 
+                                    'Add to Cart' 
+                                }}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -144,96 +167,16 @@
     </div>
     
 
-    <script>
+    <script type="module">
+        import {clubs} from "./clubs.js"
+
         new Vue({
             el: '#App',
             data: {
                 sitename: "After School Clubs",
-                filterCriteria: '', // Selected filter criteria (subject, location, price, availability)
-                sortDirection: '', // Sort direction (asc or desc)
-                clubs: [
-                    {
-                        id: 1,
-                        subject: "Maths",
-                        location: "Burjuman",
-                        price: 200,
-                        availability: 5,
-                        image: "images/math.jpg"
-                    },
-                    {
-                        id: 2,
-                        subject: "English",
-                        location: "Al Barsha",
-                        price: 180,
-                        availability: 4,
-                        image: "images/english.jpg"
-                    },
-                    {
-                        id: 3,
-                        subject: "Science",
-                        location: "Al Rigga",
-                        price: 220,
-                        availability: 1, 
-                        image: "images/science.jpg"
-                    },
-                    {
-                        id: 4,
-                        subject: "Sports",
-                        location: "Al Khail",
-                        price: 400,
-                        availability: 3,
-                        image: "images/sports.jpg"
-                    },
-                    {
-                        id: 5,
-                        subject: "Music",
-                        location: "Al Majaz",
-                        price: 350,
-                        availability: 2,
-                        image: "images/music.jpg"
-                    },
-                    {
-                        id: 6,
-                        subject: "Debate",
-                        location: "Deira",
-                        price: 270,
-                        availability: 3, 
-                        image: "images/debate.jpg"
-                    },
-                    {
-                        id: 7,
-                        subject: "Technology",
-                        location: "Expo City",
-                        price: 190,
-                        availability: 4,
-                        image: "images/tech.jpg"
-                    },
-                    {
-                        id: 8,
-                        subject: "Art",
-                        location: "Emirates Hills",
-                        price: 260,
-                        availability: 1,
-                        image: "images/art.jpg"
-                    },
-                    {
-                        id: 9,
-                        subject: "Photography",
-                        location: "Palm Jumeirah",
-                        price: 320,
-                        availability: 6, 
-                        image: "images/photography.jpg"
-                    },
-                    {
-                        id: 10,
-                        subject: "History",
-                        location: "Khalifa Street",
-                        price: 340,
-                        availability: 8, 
-                        image: "images/history.jpeg"
-                    }
-
-                ],
+                filterCriteria: '', 
+                sortDirection: '', 
+                clubs: clubs,
                 cart: [],
                 showCheckout: false,
                 showSuccess: false,
@@ -243,7 +186,7 @@
                 phoneError: '',
                 isNameValid: false,
                 isPhoneValid: false,
-                searchQuery: '',
+                userQuery: '',
             },
             computed: {
                 filteredAndSortedClubs() {
@@ -268,6 +211,10 @@
                 },
                 isFormValid() {
                     return this.isNameValid && this.isPhoneValid;
+                },
+
+                getTotalPrice() {
+                    return this.cart.reduce((total, item) => total + item.price, 0);
                 }
             },
             methods: {
@@ -372,9 +319,7 @@
                         this.showSuccess = true;
                         this.showCheckout = false; 
                     }
-                },
-                
-
+                }
             }
         });
     </script>
