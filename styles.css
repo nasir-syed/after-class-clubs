@@ -449,6 +449,22 @@ p {
     transition: 0.2s ease-in-out;
 }
 
+.rating {
+    display: inline-flex;
+    gap: 5px;
+    margin: 10px 0;
+    align-items: center;
+}
+
+
+
+.fa-star {
+    color: #93064d; 
+    cursor: pointer;
+}
+
+
+
 /* width */
 ::-webkit-scrollbar {
     width: 15px;

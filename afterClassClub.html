@@ -147,6 +147,15 @@
                                 <p></p>
                                 <p><strong>Stock:</strong> {{ club.availability }}</p>
                             </div>
+                            <div class="rating">
+                                <span 
+                                    v-for="n in 5" 
+                                    :key="n" 
+                                    class="fa-star" 
+                                    :class="n <= club.rating ? 'fas' : 'far'" 
+                                    @click="setRating(club, n)">
+                            </span>
+                            </div>
                             <button 
                                 v-on:click="addToCart(club)" 
                                 :disabled="club.availability === 0"
@@ -231,6 +240,10 @@
                         this.phone = null
                     }
 
+                },
+
+                setRating(club, rating) {
+                      club.rating = rating;
                 },
 
                 toggleSuccess() {
