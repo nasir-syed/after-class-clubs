@@ -14,7 +14,11 @@
     <div id="App">
         <header>
             <h1>{{ sitename }}</h1>
-            <button class="cart-icon" v-if="cart.length > 0" v-on:click="toggleCheckout">
+            <button 
+                class="cart-icon" 
+                :disabled="cart.length === 0" 
+                v-on:click="toggleCheckout"
+            >
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-count">{{ cart.length }}</span>
             </button>
@@ -96,7 +100,6 @@
             
             <div v-else-if="!showSuccess && !showCheckout">
                 <div class="sidebar">
-                    
                     <div class="filter">
                         <div class="filter-group">
                             <label for="filterCriteria">Filter:</label>
@@ -129,7 +132,6 @@
 
                 <div class="clubs-container">
                     <div class="club-card" v-for="club in filteredAndSortedClubs" :key="club.id">
-                        <div class="card-front">
                             <figure>
                                 <img :src="club.image" :alt="club.subject + ' image'" class="club-image">
                             </figure>
@@ -139,27 +141,18 @@
                                 <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(club.location)" target="_blank">
                                     {{ club.location }}
                                 </a>
+                                , <strong>${{ club.price }}</strong>
                             </p>
                             <div style="margin-top: 5%;">
-                                <p><strong>${{ club.price }}</strong></p>
+                                <p></p>
                                 <p><strong>Stock:</strong> {{ club.availability }}</p>
                             </div>
-                        </div>
-
-                        <div class="card-back">
-                            <p>
-                                {{club.description}}
-                            </p>
                             <button 
-                                v-on:click="toggleCart(club)" 
-                                :disabled="club.availability === 0 && !isInCart(club)"
-                                :class="isInCart(club) ? 'add-button remove-from-cart' : 'add-button'">
-                                {{ 
-                                    isInCart(club) ? 'Remove from Cart' : club.availability === 0 ? 'Out of Stock' : 
-                                    'Add to Cart' 
-                                }}
+                                v-on:click="addToCart(club)" 
+                                :disabled="club.availability === 0"
+                                class="add-button">
+                                {{ club.availability === 0 ? 'Out of Stock' : 'Add to Cart' }}
                             </button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -192,15 +185,19 @@
                 filteredAndSortedClubs() {
                     let sortedClubs = this.clubs;
 
-                    // Apply search filter
-                    if (this.searchQuery) {
-                        sortedClubs = sortedClubs.filter(club => 
-                            club.subject.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-                            club.location.toLowerCase().includes(this.searchQuery.toLowerCase())
-                        );
-                    }
+                    if (this.userQuery) {
+                        sortedClubs = []
 
-                    // Apply sorting if both criteria and direction are selected
+                        for (let club of this.clubs) {
+                            const subjectMatches = club.subject.toLowerCase().indexOf(this.userQuery.toLowerCase()) !== -1;
+                            const locationMatches = club.location.toLowerCase().indexOf(this.userQuery.toLowerCase()) !== -1;
+
+                            if (subjectMatches || locationMatches) {
+                                sortedClubs.push(club);
+                            }
+                    }
+                }
+
                     if (this.filterCriteria && this.sortDirection) {
                         sortedClubs = sortedClubs.sort((a, b) => {
                             return this.sortClubs(a, b, this.filterCriteria);

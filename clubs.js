@@ -1,39 +1,35 @@
 export const clubs = [
     {
         id: 1,
-        subject: "Maths",
+        subject: "Tennis",
         location: "Burjuman",
         price: 200,
-        availability: 5,
-        image: "images/math.jpg",
-        description: "Sharpen your math skills with interactive lessons and fun challenges. Learn techniques that make solving problems easier and faster."
+        availability: 0,
+        image: "images/tennis.png",
     },
     {
         id: 2,
-        subject: "English",
+        subject: "Karate",
         location: "Al Barsha",
         price: 180,
         availability: 4,
-        image: "images/english.jpg",
-        description: "Improve your reading, writing, and communication through engaging activities. From grammar to creative writing, boost your English skills."
+        image: "images/karate.jpg",
     },
     {
         id: 3,
-        subject: "Science",
+        subject: "Dance",
         location: "Al Rigga",
         price: 220,
         availability: 1,
-        image: "images/science.jpg",
-        description: "Explore the wonders of science with hands-on experiments and projects. Discover exciting concepts in biology, physics, and chemistry."
+        image: "images/dance.png",
     },
     {
         id: 4,
-        subject: "Sports",
+        subject: "Cooking",
         location: "Al Khail",
         price: 400,
         availability: 3,
-        image: "images/sports.jpg",
-        description: "Stay fit and active by participating in various sports activities. Learn teamwork, strategy, and skills in sports like football and basketball."
+        image: "images/cooking.png",
     },
     {
         id: 5,
@@ -42,7 +38,6 @@ export const clubs = [
         price: 350,
         availability: 2,
         image: "images/music.jpg",
-        description: "Discover the joy of music by learning instruments, vocals, and rhythm. Whether you're a beginner or experienced, enhance your musical talents."
     },
     {
         id: 6,
@@ -51,7 +46,6 @@ export const clubs = [
         price: 270,
         availability: 3,
         image: "images/debate.jpg",
-        description: "Develop your public speaking and debating skills in a fun setting. Learn to build arguments, think critically, and express your ideas clearly."
     },
     {
         id: 7,
@@ -59,8 +53,7 @@ export const clubs = [
         location: "Expo City",
         price: 190,
         availability: 4,
-        image: "images/tech.jpg",
-        description: "Learn cutting-edge tech skills in coding, robotics, and more. Discover the latest trends in technology and how to apply them in real life."
+        image: "images/tech.png",
     },
     {
         id: 8,
@@ -69,7 +62,6 @@ export const clubs = [
         price: 260,
         availability: 1,
         image: "images/art.jpg",
-        description: "Express your creativity through painting, drawing, and mixed media. Whether you're a beginner or advanced, this club nurtures your artistic side."
     },
     {
         id: 9,
@@ -78,15 +70,13 @@ export const clubs = [
         price: 320,
         availability: 6,
         image: "images/photography.jpg",
-        description: "Capture stunning images and learn essential photography techniques. Explore different styles and improve your skills with a camera."
     },
     {
         id: 10,
-        subject: "History",
+        subject: "Gaming",
         location: "Khalifa Street",
         price: 340,
         availability: 8,
-        image: "images/history.jpeg",
-        description: "Travel back in time to discover historical events and civilizations. Learn about the impact of history on the present and the future."
+        image: "images/gaming.jpg",
     }
 ];
