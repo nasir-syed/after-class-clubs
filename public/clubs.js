@@ -6,7 +6,7 @@ export const clubs = [
         price: 200,
         availability: 0,
         image: "images/tennis.png",
-        rating: 0,
+        rating: 3,
     },
     {
         id: 2,
@@ -15,7 +15,7 @@ export const clubs = [
         price: 180,
         availability: 4,
         image: "images/karate.jpg",
-        rating: 0,
+        rating: 2,
     },
     {
         id: 3,
@@ -24,7 +24,7 @@ export const clubs = [
         price: 220,
         availability: 1,
         image: "images/dance.png",
-        rating: 0,
+        rating: 5,
     },
     {
         id: 4,
@@ -33,7 +33,7 @@ export const clubs = [
         price: 400,
         availability: 3,
         image: "images/cooking.png",
-        rating: 0,
+        rating: 1,
     },
     {
         id: 5,
@@ -42,7 +42,7 @@ export const clubs = [
         price: 350,
         availability: 2,
         image: "images/music.jpg",
-        rating: 0,
+        rating: 4,
     },
     {
         id: 6,
@@ -51,7 +51,7 @@ export const clubs = [
         price: 270,
         availability: 3,
         image: "images/debate.jpg",
-        rating: 0,
+        rating: 2,
     },
     {
         id: 7,
@@ -60,7 +60,7 @@ export const clubs = [
         price: 190,
         availability: 4,
         image: "images/tech.png",
-        rating: 0,
+        rating: 5,
     },
     {
         id: 8,
@@ -69,7 +69,7 @@ export const clubs = [
         price: 260,
         availability: 1,
         image: "images/art.jpg",
-        rating: 0,
+        rating: 5,
     },
     {
         id: 9,
@@ -78,7 +78,7 @@ export const clubs = [
         price: 320,
         availability: 6,
         image: "images/photography.jpg",
-        rating: 0,
+        rating: 1,
     },
     {
         id: 10,
@@ -87,6 +87,6 @@ export const clubs = [
         price: 340,
         availability: 8,
         image: "images/gaming.jpg",
-        rating: 0,
+        rating: 3,
     }
 ];

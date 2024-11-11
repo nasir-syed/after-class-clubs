@@ -141,7 +141,8 @@
                                 <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(club.location)" target="_blank">
                                     {{ club.location }}
                                 </a>
-                                , <strong>${{ club.price }}</strong>
+                                <strong>·</strong> 
+                                <strong>${{ club.price }}</strong>
                             </p>
                             <div style="margin-top: 5%;">
                                 <p></p>
@@ -152,8 +153,7 @@
                                     v-for="n in 5" 
                                     :key="n" 
                                     class="fa-star" 
-                                    :class="n <= club.rating ? 'fas' : 'far'" 
-                                    @click="setRating(club, n)">
+                                    :class="n <= club.rating ? 'fas' : 'far'" >
                             </span>
                             </div>
                             <button 
@@ -240,10 +240,6 @@
                         this.phone = null
                     }
 
-                },
-
-                setRating(club, rating) {
-                      club.rating = rating;
                 },
 
                 toggleSuccess() {
