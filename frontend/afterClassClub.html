@@ -45,10 +45,10 @@
                         <div class="cart-items">
                             <div class="cart-item" v-for="item in cart" :key="item.id">
                                 <figure>
-                                    <img :src="item.image" :alt="item.subject" class="cart-item-image">
+                                    <img :src="item.image" :alt="item.name" class="cart-item-image">
                                 </figure>
                                 <div class="cart-item-info">
-                                    <h2>{{ item.subject }}</h2>
+                                    <h2>{{ item.name }}</h2>
                                     <div style="display: flex; gap: 8px;">
                                         <p>
                                             <i class="fas fa-map-marker-alt" style="margin-right: 5px; color: #93064d;"></i>
@@ -105,7 +105,7 @@
                             <label for="filterCriteria">Filter:</label>
                             <select id="filterCriteria" v-model="filterCriteria">
                                 <option value="">None</option>
-                                <option value="subject">Subject</option>
+                                <option value="name">Name</option>
                                 <option value="location">Location</option>
                                 <option value="price">Price</option>
                                 <option value="availability">Availability</option>
@@ -133,9 +133,9 @@
                 <div class="clubs-container">
                     <div class="club-card" v-for="club in filteredAndSortedClubs" :key="club.id">
                             <figure>
-                                <img :src="club.image" :alt="club.subject + ' image'" class="club-image">
+                                <img :src="'http://localhost:3000/' + club.image"  :alt="club.name + ' image'" class="club-image">
                             </figure>
-                            <h2>{{ club.subject }}</h2>
+                            <h2>{{ club.name }}</h2>
                             <p>
                                 <i class="fas fa-map-marker-alt" style="margin-right: 5px; color: #93064d;"></i>
                                 <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(club.location)" target="_blank">
@@ -170,15 +170,13 @@
     
 
     <script type="module">
-        import {clubs} from "./clubs.js"
-
         new Vue({
             el: '#App',
             data: {
                 sitename: "After School Clubs",
-                filterCriteria: '', 
-                sortDirection: '', 
-                clubs: clubs,
+                filterCriteria: '',
+                sortDirection: '',
+                clubs: [], 
                 cart: [],
                 showCheckout: false,
                 showSuccess: false,
@@ -190,61 +188,137 @@
                 isPhoneValid: false,
                 userQuery: '',
             },
+            watch: {
+                userQuery: 'fetchSearchedClubs'
+            },
             computed: {
                 filteredAndSortedClubs() {
                     let sortedClubs = this.clubs;
-
+    
                     if (this.userQuery) {
                         sortedClubs = []
-
+    
                         for (let club of this.clubs) {
-                            const subjectMatches = club.subject.toLowerCase().indexOf(this.userQuery.toLowerCase()) !== -1;
+                            const nameMatches = club.name.toLowerCase().indexOf(this.userQuery.toLowerCase()) !== -1;
                             const locationMatches = club.location.toLowerCase().indexOf(this.userQuery.toLowerCase()) !== -1;
-
-                            if (subjectMatches || locationMatches) {
+    
+                            if (nameMatches || locationMatches) {
                                 sortedClubs.push(club);
                             }
+                        }
                     }
-                }
-
+    
                     if (this.filterCriteria && this.sortDirection) {
                         sortedClubs = sortedClubs.sort((a, b) => {
                             return this.sortClubs(a, b, this.filterCriteria);
                         });
                     }
-
+    
                     return sortedClubs;
                 },
                 isFormValid() {
                     return this.isNameValid && this.isPhoneValid;
                 },
-
+    
                 getTotalPrice() {
                     return this.cart.reduce((total, item) => total + item.price, 0);
                 }
             },
             methods: {
+                async fetchClubs() {
+                    try {
+                        
+                        const response = await fetch('http://localhost:3000/products'); 
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.clubs = data;
+                            console.log(this.clubs)
+                        } else {
+                            console.error('Failed to fetch clubs');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching clubs:', error);
+                    }
+                },
+                async fetchSearchedClubs() {
+                    try {
+                        const response = await fetch(`http://localhost:3000/search?query=${encodeURIComponent(this.userQuery)}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            this.filteredClubs = data;
+                        } else {
+                            console.error('Failed to fetch search results');
+                        }
+                    } catch (error) {
+                        console.error('Error fetching search results:', error);
+                    }
+                },
+                async createOrder() {
+                    try {
+                        const orderData = {
+                            name: this.name,
+                            phone: this.phone,
+                            totalPrice: this.getTotalPrice,
+                            order: [...this.cart]
+                        };
+                        const response = await fetch('http://localhost:3000/orders', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(orderData)
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to create order');
+                        }
+
+                        const data = await response.json();
+                        console.log('Order created successfully:', data);
+                    } catch (error) {
+                        console.error('Error creating order:', error);
+                    }
+                },
+
+                async updateProductAvailability() {
+                    try {
+                        const response = await fetch('http://localhost:3000/products/updateAvailability', {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ cart: this.cart })
+                        });
+
+                        if (!response.ok) {
+                            throw new Error('Failed to update product availability');
+                        }
+
+                        const data = await response.json();
+                        console.log('Product availability updated successfully:', data);
+                    } catch (error) {
+                        console.error('Error updating product availability:', error);
+                    }
+                },
+
                 toggleCart(club) {
                     if (this.isInCart(club)) {
                         this.removeFromCart(club);
-                        
                     } else {
                         this.addToCart(club);
                     }
                 },
 
                 toggleCheckout() {
-                    this.showCheckout = !this.showCheckout
-                    if (this.showCheckout){
-                        this.name = null
-                        this.phone = null
+                    this.showCheckout = !this.showCheckout;
+                    if (this.showCheckout) {
+                        this.name = null;
+                        this.phone = null;
                     }
-
                 },
 
                 toggleSuccess() {
                     this.showSuccess = !this.showSuccess;
-                    
                 },
 
                 sortClubs(club1, club2, filter) {
@@ -260,9 +334,7 @@
                 addToCart(club) {
                     if (club.availability > 0) {
                         this.cart.push({ ...club });
-                        
-                        const realClub = this.clubs.find(c => c.id === club.id);
-                    
+                        const realClub = this.clubs.find(c => c.name === club.name);
                         if (realClub) {
                             realClub.availability -= 1;
                         }
@@ -279,55 +351,63 @@
                             realClub.availability += 1;
                         }
 
-                        if(this.cart.length == 0 && this.showCheckout){
-                            this.toggleCheckout()
+                        if (this.cart.length == 0 && this.showCheckout) {
+                            this.toggleCheckout();
                         }
                     }
                 },
-                
+
                 isInCart(club) {
                     return this.cart.some(item => item.id === club.id);
                 },
 
                 validateName() {
                     const namePattern = /^[A-Za-z\s]*$/; 
-                    const lengthValid = this.name.length <= 50 && this.name.length > 0; 
-                    
+                    const lengthValid = this.name.length <= 50 && this.name.length > 0;
+
                     if (!namePattern.test(this.name) && this.name.length > 0) {
                         this.nameError = 'Name should only contain letters.';
                     } else if (!lengthValid) {
                         this.nameError = 'Name cannot exceed 50 characters.';
                     } else {
-                        this.nameError = ''; 
+                        this.nameError = '';
                     }
-                    
-                    this.isNameValid = namePattern.test(this.name) && lengthValid; 
+
+                    this.isNameValid = namePattern.test(this.name) && lengthValid;
                 },
 
                 validatePhone() {
                     const phonePattern = /^[0-9]*$/; 
-                    const lengthValid = this.phone.length <= 17 && this.phone.length > 0; 
+                    const lengthValid = this.phone.length <= 17 && this.phone.length > 0;
 
                     if (!phonePattern.test(this.phone) && this.phone.length > 0) {
                         this.phoneError = 'Phone should only contain numbers.';
                     } else if (!lengthValid) {
                         this.phoneError = 'Phone cannot exceed 17 digits.';
                     } else {
-                        this.phoneError = ''; 
+                        this.phoneError = '';
                     }
 
-                    this.isPhoneValid = phonePattern.test(this.phone) && lengthValid; 
+                    this.isPhoneValid = phonePattern.test(this.phone) && lengthValid;
                 },
 
                 validateAndSubmit() {
                     if (this.isFormValid) {
-                        this.cart = []; 
+                        
+                        this.createOrder();
+        
+                        this.updateProductAvailability();
+
+                        this.cart = [];
                         this.showSuccess = true;
-                        this.showCheckout = false; 
+                        this.showCheckout = false;
                     }
-                }
+                },
+            },
+            mounted() {
+                this.fetchClubs(); 
             }
         });
-    </script>
+    </script>    
 </body>
 </html>
