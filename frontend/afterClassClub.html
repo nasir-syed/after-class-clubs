@@ -45,7 +45,7 @@
                         <div class="cart-items">
                             <div class="cart-item" v-for="item in cart" :key="item.id">
                                 <figure>
-                                    <img :src="'http://localhost:3000/' + item.image" :alt="item.name" class="cart-item-image">
+                                    <img :src="'https://after-class-clubs.onrender.com/' + item.image" :alt="item.name" class="cart-item-image">
                                 </figure>
                                 <div class="cart-item-info">
                                     <h2>{{ item.name }}</h2>
@@ -133,7 +133,7 @@
                 <div class="clubs-container">
                     <div class="club-card" v-for="club in filteredAndSortedClubs" :key="club.id">
                             <figure>
-                                <img :src="'http://localhost:3000/' + club.image"  :alt="club.name + ' image'" class="club-image">
+                                <img :src="'https://after-class-clubs.onrender.com/' + club.image"  :alt="club.name + ' image'" class="club-image">
                             </figure>
                             <h2>{{ club.name }}</h2>
                             <p>
@@ -228,7 +228,7 @@
                 async fetchClubs() {
                     try {
                         
-                        const response = await fetch('http://localhost:3000/products'); 
+                        const response = await fetch('https://after-class-clubs.onrender.com/products'); 
                         if (response.ok) {
                             const data = await response.json();
                             this.clubs = data;
@@ -241,7 +241,7 @@
                 },
                 async fetchSearchedClubs() {
                     try {
-                        const response = await fetch(`http://localhost:3000/search?query=${encodeURIComponent(this.userQuery)}`);
+                        const response = await fetch(`https://after-class-clubs.onrender.com/search?query=${encodeURIComponent(this.userQuery)}`);
                         if (response.ok) {
                             const data = await response.json();
                             this.filteredClubs = data;
@@ -260,7 +260,7 @@
                             totalPrice: this.getTotalPrice,
                             order: [...this.cart]
                         };
-                        const response = await fetch('http://localhost:3000/orders', {
+                        const response = await fetch('https://after-class-clubs.onrender.com/orders', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -281,7 +281,7 @@
 
                 async updateProductAvailability() {
                     try {
-                        const response = await fetch('http://localhost:3000/products/updateAvailability', {
+                        const response = await fetch('https://after-class-clubs.onrender.com/products/updateAvailability', {
                             method: 'PUT',
                             headers: {
                                 'Content-Type': 'application/json'
