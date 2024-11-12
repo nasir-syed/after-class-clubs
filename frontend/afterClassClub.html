@@ -45,7 +45,7 @@
                         <div class="cart-items">
                             <div class="cart-item" v-for="item in cart" :key="item.id">
                                 <figure>
-                                    <img :src="http://localhost:3000/' + item.image" :alt="item.name" class="cart-item-image">
+                                    <img :src="'http://localhost:3000/' + item.image" :alt="item.name" class="cart-item-image">
                                 </figure>
                                 <div class="cart-item-info">
                                     <h2>{{ item.name }}</h2>
@@ -133,7 +133,7 @@
                 <div class="clubs-container">
                     <div class="club-card" v-for="club in filteredAndSortedClubs" :key="club.id">
                             <figure>
-                                <img :src="http://localhost:3000/' + club.image"  :alt="club.name + ' image'" class="club-image">
+                                <img :src="'http://localhost:3000/' + club.image"  :alt="club.name + ' image'" class="club-image">
                             </figure>
                             <h2>{{ club.name }}</h2>
                             <p>
