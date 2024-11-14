@@ -74,9 +74,11 @@ h1 {
 }
 
 .cart-item-info h2, .club-card h2 {
-   font-family: 'Tangerine', serif;
-   font-size: 40px;
-    
+   font-family: 'Tangerine', serif;    
+}
+
+.club-card h2 {
+    font-size: 40px;
 }
 
 .clubs-container a, .cart-item-info a{
@@ -313,8 +315,9 @@ p {
     width: 100%;
 }
 
+
 .cart-item-info h2 {
-    font-size: 25px;
+    font-size: 40px;
     margin: 30px 0px 15px 0px;
     color: #f5f5f5;
 }
