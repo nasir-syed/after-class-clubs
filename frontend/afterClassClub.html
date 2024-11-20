@@ -195,27 +195,16 @@
             },
             computed: {
                 filteredAndSortedClubs() {
-                    let sortedClubs = this.clubs;
-    
                     if (this.userQuery) {
-                        sortedClubs = []
-    
-                        for (let club of this.clubs) {
-                            const nameMatches = club.name.toLowerCase().indexOf(this.userQuery.toLowerCase()) !== -1;
-                            const locationMatches = club.location.toLowerCase().indexOf(this.userQuery.toLowerCase()) !== -1;
-    
-                            if (nameMatches || locationMatches) {
-                                sortedClubs.push(club);
-                            }
-                        }
+                        this.fetchSearchedClubs();
                     }
-    
+
+                    let sortedClubs = [...this.clubs];
+
                     if (this.filterCriteria && this.sortDirection) {
-                        sortedClubs = sortedClubs.sort((a, b) => {
-                            return this.sortClubs(a, b, this.filterCriteria);
-                        });
+                        sortedClubs.sort((a, b) => this.sortClubs(a, b, this.filterCriteria));
                     }
-    
+
                     return sortedClubs;
                 },
                 isFormValid() {
@@ -246,7 +235,7 @@
                         const response = await fetch(`https://after-class-clubs.onrender.com/search?query=${encodeURIComponent(this.userQuery)}`);
                         if (response.ok) {
                             const data = await response.json();
-                            this.filteredClubs = data;
+                            this.clubs = data;
                         } else {
                             console.error('Failed to fetch search results');
                         }
