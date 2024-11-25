@@ -178,7 +178,7 @@
                 sitename: "After School Clubs",
                 filterCriteria: '',
                 sortDirection: '',
-                clubs: [], 
+                clubs: [],
                 cart: [],
                 showCheckout: false,
                 showSuccess: false,
@@ -189,28 +189,22 @@
                 isNameValid: false,
                 isPhoneValid: false,
                 userQuery: '',
-            },
-            watch: {
-                userQuery: 'fetchSearchedClubs'
+                searchTimer: null, 
+                searchResults: [],
             },
             computed: {
                 filteredAndSortedClubs() {
-                    if (this.userQuery) {
-                        this.fetchSearchedClubs();
-                    }
-
-                    let sortedClubs = [...this.clubs];
-
+                    const displayedClubs = this.userQuery ? this.searchResults : this.clubs;
+    
+                    let sortedClubs = [...displayedClubs];
                     if (this.filterCriteria && this.sortDirection) {
                         sortedClubs.sort((a, b) => this.sortClubs(a, b, this.filterCriteria));
                     }
-
                     return sortedClubs;
                 },
                 isFormValid() {
                     return this.isNameValid && this.isPhoneValid;
                 },
-    
                 getTotalPrice() {
                     return this.cart.reduce((total, item) => total + item.price, 0);
                 }
@@ -218,8 +212,7 @@
             methods: {
                 async fetchClubs() {
                     try {
-                        
-                        const response = await fetch('https://after-class-clubs.onrender.com/products'); 
+                        const response = await fetch('https://after-class-clubs.onrender.com/products');
                         if (response.ok) {
                             const data = await response.json();
                             this.clubs = data;
@@ -230,12 +223,12 @@
                         console.error('Error fetching clubs:', error);
                     }
                 },
-                async fetchSearchedClubs() {
+                async fetchSearchedClubs(query) {
                     try {
-                        const response = await fetch(`https://after-class-clubs.onrender.com/search?query=${encodeURIComponent(this.userQuery)}`);
+                        const response = await fetch(`https://after-class-clubs.onrender.com/search?query=${encodeURIComponent(query)}`);
                         if (response.ok) {
                             const data = await response.json();
-                            this.clubs = data;
+                            this.searchResults = data;
                         } else {
                             console.error('Failed to fetch search results');
                         }
@@ -243,54 +236,16 @@
                         console.error('Error fetching search results:', error);
                     }
                 },
-                async createOrder() {
-                    try {
-                        const orderData = {
-                            name: this.name,
-                            phone: this.phone,
-                            totalPrice: this.getTotalPrice,
-                            order: [...this.cart]
-                        };
-                        const response = await fetch('https://after-class-clubs.onrender.com/orders', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(orderData)
-                        });
-
-                        if (!response.ok) {
-                            throw new Error('Failed to create order');
+                debounceSearch() {
+                    clearTimeout(this.searchTimer);
+                    this.searchTimer = setTimeout(() => {
+                        if (this.userQuery) {
+                            this.fetchSearchedClubs(this.userQuery);
+                        } else {
+                            this.searchResults = []; 
                         }
-
-                        const data = await response.json();
-                        console.log('Order created successfully:', data);
-                    } catch (error) {
-                        console.error('Error creating order:', error);
-                    }
+                    }, 500); 
                 },
-
-                async updateProductAvailability() {
-                    try {
-                        const response = await fetch('https://after-class-clubs.onrender.com/products/updateAvailability', {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ cart: this.cart })
-                        });
-
-                        if (!response.ok) {
-                            throw new Error('Failed to update product availability');
-                        }
-
-                        const data = await response.json();
-                        console.log('Product availability updated successfully:', data);
-                    } catch (error) {
-                        console.error('Error updating product availability:', error);
-                    }
-                },
-
                 toggleCart(club) {
                     if (this.isInCart(club)) {
                         this.removeFromCart(club);
@@ -298,7 +253,6 @@
                         this.addToCart(club);
                     }
                 },
-
                 toggleCheckout() {
                     this.showCheckout = !this.showCheckout;
                     if (this.showCheckout) {
@@ -306,11 +260,9 @@
                         this.phone = null;
                     }
                 },
-
                 toggleSuccess() {
                     this.showSuccess = !this.showSuccess;
                 },
-
                 sortClubs(club1, club2, filter) {
                     if (club1[filter] > club2[filter]) {
                         return this.sortDirection === 'asc' ? 1 : -1;
@@ -320,82 +272,12 @@
                         return 0;
                     }
                 },
-
-                addToCart(club) {
-                    if (club.availability > 0) {
-                        this.cart.push({ ...club });
-                        const realClub = this.clubs.find(c => c.name === club.name);
-                        if (realClub) {
-                            realClub.availability -= 1;
-                        }
-                    }
-                },
-
-                removeFromCart(club) {
-                    const index = this.cart.findIndex(item => item.id === club.id);
-                    if (index !== -1) {
-                        this.cart.splice(index, 1);
-
-                        const realClub = this.clubs.find(c => c.id === club.id);
-                        if (realClub) {
-                            realClub.availability += 1;
-                        }
-
-                        if (this.cart.length == 0 && this.showCheckout) {
-                            this.toggleCheckout();
-                        }
-                    }
-                },
-
-                isInCart(club) {
-                    return this.cart.some(item => item.id === club.id);
-                },
-
-                validateName() {
-                    const namePattern = /^[A-Za-z\s]*$/; 
-                    const lengthValid = this.name.length <= 50 && this.name.length > 0;
-
-                    if (!namePattern.test(this.name) && this.name.length > 0) {
-                        this.nameError = 'Name should only contain letters.';
-                    } else if (!lengthValid) {
-                        this.nameError = 'Name cannot exceed 50 characters.';
-                    } else {
-                        this.nameError = '';
-                    }
-
-                    this.isNameValid = namePattern.test(this.name) && lengthValid;
-                },
-
-                validatePhone() {
-                    const phonePattern = /^[0-9]*$/; 
-                    const lengthValid = this.phone.length <= 17 && this.phone.length > 0;
-
-                    if (!phonePattern.test(this.phone) && this.phone.length > 0) {
-                        this.phoneError = 'Phone should only contain numbers.';
-                    } else if (!lengthValid) {
-                        this.phoneError = 'Phone cannot exceed 17 digits.';
-                    } else {
-                        this.phoneError = '';
-                    }
-
-                    this.isPhoneValid = phonePattern.test(this.phone) && lengthValid;
-                },
-
-                validateAndSubmit() {
-                    if (this.isFormValid) {
-                        
-                        this.createOrder();
-        
-                        this.updateProductAvailability();
-
-                        this.cart = [];
-                        this.showSuccess = true;
-                        this.showCheckout = false;
-                    }
-                },
+            },
+            watch: {
+                userQuery: 'fetchSearchedClubs'
             },
             mounted() {
-                this.fetchClubs(); 
+                this.fetchClubs();
             }
         });
     </script>    
