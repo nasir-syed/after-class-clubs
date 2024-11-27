@@ -321,11 +321,11 @@
                     }
                 },
                 removeFromCart(club) {
-                    const index = this.cart.findIndex(item => item.id === club.id);
+                    const index = this.cart.findIndex(item => item.name === club.name);
                     if (index !== -1) {
                         this.cart.splice(index, 1);
                         
-                        const realClub = this.clubs.find(c => c.id === club.id);
+                        const realClub = this.clubs.find(c => c.name === club.name);
                         if (realClub) {
                             realClub.availability += 1; 
                         }
