@@ -25,7 +25,7 @@
                 <span class="cart-count">{{ cart.length }}</span>
             </button>
         </header>
-    
+
         <main>
 
             <div v-if="showSuccess">
@@ -36,7 +36,7 @@
                     </div>
                 </div>
             </div>
-    
+
             <div v-if="showCheckout && !showSuccess">
                 <div class="checkout-container">
                     <div class="cart-items-container">
@@ -68,7 +68,7 @@
                             </div>
                         </div>
                     </div>
-            
+
                     <div class="checkout-form">
                         <form v-on:submit.prevent="validateAndSubmit">
                             <label for="name">Name</label>
@@ -80,7 +80,7 @@
                                 :class="{ invalid: !isNameValid && name }"
                             >
                             <span v-if="!isNameValid && name" class="error-message">{{nameError}}</span>
-            
+
                             <label for="phone">Phone</label>
                             <input 
                                 type="text" 
@@ -90,7 +90,7 @@
                                 :class="{ invalid: !isPhoneValid && phone }"
                             >
                             <span v-if="!isPhoneValid && phone" class="error-message">{{phoneError}}</span>
-            
+
                             <button type="submit" :disabled="!isFormValid" class="checkout-button">
                                 Checkout
                             </button>
@@ -98,8 +98,8 @@
                     </div>
                 </div>
             </div>
-            
-            
+
+
             <div v-else-if="!showSuccess && !showCheckout">
                 <div class="sidebar">
                     <div class="filter">
@@ -113,8 +113,8 @@
                                 <option value="availability">Availability</option>
                             </select>
                         </div>
-    
-                        
+
+
                         <div class="filter-group" v-if="filterCriteria">
                             <label for="sortDirection">Sort:</label>
                             <select id="sortDirection" v-model="sortDirection">
@@ -190,13 +190,10 @@
                 isPhoneValid: false,
                 userQuery: '',
                 searchTimer: null, 
-                searchResults: [],
             },
             computed: {
                 filteredAndSortedClubs() {
-                    const displayedClubs = this.userQuery ? this.searchResults : this.clubs;
-    
-                    let sortedClubs = [...displayedClubs];
+                    let sortedClubs = [...this.clubs];
                     if (this.filterCriteria && this.sortDirection) {
                         sortedClubs.sort((a, b) => this.sortClubs(a, b, this.filterCriteria));
                     }
@@ -228,7 +225,7 @@
                         const response = await fetch(`https://after-class-clubs.onrender.com/search?query=${encodeURIComponent(query)}`);
                         if (response.ok) {
                             const data = await response.json();
-                            this.searchResults = data;
+                            this.clubs = data; 
                         } else {
                             console.error('Failed to fetch search results');
                         }
@@ -239,12 +236,54 @@
                 debounceSearch() {
                     clearTimeout(this.searchTimer);
                     this.searchTimer = setTimeout(() => {
-                        if (this.userQuery) {
+                        if (this.userQuery.trim()) {
                             this.fetchSearchedClubs(this.userQuery);
                         } else {
-                            this.searchResults = []; 
+                            this.fetchClubs(); 
                         }
                     }, 500); 
+                },
+                async createOrder() {
+                    try {
+                        const orderData = {
+                            name: this.name,
+                            phone: this.phone,
+                            totalPrice: this.getTotalPrice,
+                            order: [...this.cart]
+                        };
+                        const response = await fetch('https://after-class-clubs.onrender.com/orders', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(orderData)
+                        });
+                        if (!response.ok) {
+                            throw new Error('Failed to create order');
+                        }
+                        const data = await response.json();
+                        console.log('Order created successfully:', data);
+                    } catch (error) {
+                        console.error('Error creating order:', error);
+                    }
+                },
+                async updateProductAvailability() {
+                    try {
+                        const response = await fetch('https://after-class-clubs.onrender.com/products/updateAvailability', {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ cart: this.cart })
+                        });
+                        if (!response.ok) {
+                            throw new Error('Failed to update product availability');
+                        }
+                        const data = await response.json();
+                        console.log('Product availability updated successfully:', data);
+                    } catch (error) {
+                        console.error('Error updating product availability:', error);
+                    }
                 },
                 toggleCart(club) {
                     if (this.isInCart(club)) {
@@ -272,9 +311,77 @@
                         return 0;
                     }
                 },
+                addToCart(club) {
+                    if (club.availability > 0) {
+                        this.cart.push({ ...club });
+                        const realClub = this.clubs.find(c => c.name === club.name);
+                        if (realClub) {
+                            realClub.availability -= 1;
+                        }
+                    }
+                },
+                removeFromCart(club) {
+                    const index = this.cart.findIndex(item => item.id === club.id);
+                    if (index !== -1) {
+                        this.cart.splice(index, 1);
+                        
+                        const realClub = this.clubs.find(c => c.id === club.id);
+                        if (realClub) {
+                            realClub.availability += 1; 
+                        }
+                        
+                        if (this.cart.length === 0 && this.showCheckout) {
+                            this.toggleCheckout();
+                        }
+                    }
+                },
+                isInCart(club) {
+                    return this.cart.some(item => item.id === club.id);
+                },
+                validateName() {
+                    const namePattern = /^[A-Za-z\s]*$/; 
+                    const lengthValid = this.name.length <= 50 && this.name.length > 0;
+                    if (!namePattern.test(this.name) && this.name.length > 0) {
+                        this.nameError = 'Name should only contain letters.';
+                    } else if (!lengthValid) {
+                        this.nameError = 'Name cannot exceed 50 characters.';
+                    } else {
+                        this.nameError = '';
+                    }
+                    this.isNameValid = namePattern.test(this.name) && lengthValid;
+                },
+                validatePhone() {
+                    const phonePattern = /^[0-9]*$/; 
+                    const lengthValid = this.phone.length <= 17 && this.phone.length > 0;
+                    if (!phonePattern.test(this.phone) && this.phone.length > 0) {
+                        this.phoneError = 'Phone should only contain numbers.';
+                    } else if (!lengthValid) {
+                        this.phoneError = 'Phone cannot exceed 17 digits.';
+                    } else {
+                        this.phoneError = '';
+                    }
+                    this.isPhoneValid = phonePattern.test(this.phone) && lengthValid;
+                },
+                validateAndSubmit() {
+                    if (this.isFormValid) {
+                        
+                        this.createOrder();
+        
+                        this.updateProductAvailability();
+                        this.cart = [];
+                        this.showSuccess = true;
+                        this.showCheckout = false;
+                    }
+                },
             },
             watch: {
-                userQuery: 'fetchSearchedClubs'
+                userQuery(newQuery) {
+                    if (newQuery.trim() === '') {
+                        this.fetchClubs(); 
+                    } else {
+                        this.debounceSearch();
+                    }
+                }
             },
             mounted() {
                 this.fetchClubs();
