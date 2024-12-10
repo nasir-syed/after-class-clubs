@@ -260,13 +260,20 @@
                     },
                     // when clubs are fetched again, if there are any in the cart then decrement the availability of the clubs that were fetched and are in the cart
                     matchClubsAvailability() {
-                        this.cart.forEach(cartItem => {
-                            const club = this.clubs.find(c => c.id === cartItem.id);
-                            if (club) {
-                                club.availability -= 1;
-                            }
+                        this.clubs.forEach(club => {
+                            
+                            let cartCount = 0;
+                        
+                            this.cart.forEach(cartItem => {
+                                if (cartItem.id === club.id) {
+                                    cartCount++;
+                                }
+                            });
+
+                            club.availability -= cartCount;
                         });
                     }
+
                 },
                 methods: {
                     // fetches all the clubs from the mongoDB database and assigns them to the this.clubs variable 
@@ -309,7 +316,7 @@
                         // Set a delay of 500ms before executing the search
                         this.searchDelay = setTimeout(() => {
                             if (this.userQuery.trim()) {
-                                this.fetchSearchedClubs(this.userQuery);
+                                this.fetchSearchedClubs(this.userQuery.trim());
                             } else {
                                 this.fetchClubs(); 
                             }
