@@ -258,7 +258,7 @@
                     getTotalPrice() {
                         return this.cart.reduce((total, item) => total + item.price, 0);
                     },
-                    // when clubs are fetched again, if there are any in the cart then decrement the availability of the clubs that were fetched and are in the cart
+                    // when clubs are fetched again, if there are any in the cart then decrement the availability of the clubs that were fetched and are in the cart.
                     matchClubsAvailability() {
                         this.clubs.forEach(club => {
                             
@@ -283,7 +283,7 @@
                             if (response.ok) {
                                 const data = await response.json();
                                 this.clubs = data;
-                                this.matchClubsAvailability();
+                                this.matchClubsAvailability;
                             } else {
                                 console.error('failed to get clubs');
                             }
@@ -299,7 +299,7 @@
                             if (response.ok) {
                                 const data = await response.json();
                                 this.clubs = data; 
-                                this.matchClubsAvailability();
+                                this.matchClubsAvailability;
                             } else {
                                 console.error('failed to get search results');
                             }
